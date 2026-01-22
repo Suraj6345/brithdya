@@ -75,18 +75,37 @@
             margin: 20px 0;
             background: rgba(0, 50, 0, 0.3);
             font-size: 0.9rem;
-            min-height: 150px;
+            min-height: 120px;
             white-space: pre-wrap; 
-            max-height: 250px;
+            max-height: 200px;
             overflow-y: auto;
         }
 
-        .signature {
-            text-align: right;
-            font-style: italic;
-            margin-top: 10px;
-            font-weight: bold;
-            color: #fff;
+        /* CAKE STYLES */
+        .cake-container {
+            margin-top: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .cake-container:hover { transform: scale(1.1); }
+        
+        .big-cake {
+            font-size: 80px;
+            filter: drop-shadow(0 0 10px var(--neon));
+            animation: bounce 2s infinite;
+        }
+
+        .plates {
+            display: none;
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .plate-item {
+            font-size: 50px;
+            animation: fadeIn 1s;
         }
 
         /* BUTTONS */
@@ -163,18 +182,20 @@
             transition: width 0.1s;
         }
 
-        /* --- WATERMARK UPDATED SIZE --- */
+        /* MEDIUM WATERMARK */
         .watermark {
             position: absolute;
-            bottom: 10px; /* Moved up slightly */
-            font-size: 12px; /* Increased from 9px to 12px (Medium) */
-            opacity: 0.7; /* Made slightly brighter */
+            bottom: 10px; 
+            font-size: 12px;
+            opacity: 0.7; 
             width: 100%;
             text-align: center;
             letter-spacing: 1px;
         }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
         @keyframes flicker { 0% { opacity: 0.95; } 100% { opacity: 1; } }
 
     </style>
@@ -233,11 +254,21 @@
 
         <div id="screen-final" class="screen">
             <p style="color: #fff; letter-spacing: 3px;">/// MESSAGE DECRYPTED ///</p>
-            <h1 style="font-size: 1.8rem;">HAPPY BIRTHDAY<br>KOPIKPO!</h1>
+            <h1 style="font-size: 1.5rem;">HAPPY BIRTHDAY<br>KOPIKPO!</h1>
             
             <div class="letter-box" id="letter-content"></div>
             
-            <button class="btn" onclick="party()">CELEBRATE 🎉</button>
+            <div id="cake-section" class="cake-container" onclick="cutCake()">
+                <p style="font-size: 10px; margin-bottom: 5px;">▼ CLICK TO CUT CAKE ▼</p>
+                <div class="big-cake">🎂</div>
+            </div>
+
+            <div id="plate-section" class="plates">
+                <div class="plate-item">🍰</div>
+                <div class="plate-item">🍰</div>
+            </div>
+            <p id="enjoy-msg" style="display:none; color: #fff; margin-top: 10px;">ENJOY THE PARTY!</p>
+
         </div>
 
         <div class="watermark">DESIGNED BY NAVNEET NARAYAN</div>
@@ -249,9 +280,7 @@
         function playMusic() {
             var audio = document.getElementById("bg-music");
             audio.volume = 0.5; 
-            audio.play().catch(error => {
-                console.log("Audio play failed (user interaction needed): " + error);
-            });
+            audio.play().catch(error => { console.log("Audio waiting for interaction"); });
         }
 
         /* --- MATRIX RAIN --- */
@@ -296,7 +325,7 @@
         }
         window.onload = typeLog;
 
-        /* --- SCREEN 2: AUTH + MUSIC START --- */
+        /* --- SCREEN 2: AUTH --- */
         function scanFinger() {
             playMusic();
             const fp = document.querySelector('.fingerprint');
@@ -327,13 +356,12 @@
                 setTimeout(() => {
                     showScreen('screen-final');
                     typeLetter(); 
-                    party();
                 }, 500);
             }
         }
 
-        /* --- SCREEN 5: LETTER TYPEWRITER --- */
-        const letterText = "Hey Kopikpo,\n\nWishing you a legendary Happy Birthday! You are not just a friend, you are like a brother to me.\n\nMay this year bring you success, happiness, and everything you've ever hacked for.\n\nEnjoy your day!\n\n-- Navneet Narayan";
+        /* --- SCREEN 5: LETTER & CAKE --- */
+        const letterText = "Hey Kopikpo,\n\nWishing you a legendary Happy Birthday! You are not just a friend, you are like a brother to me.\n\nMay this year bring you success, happiness, and everything you've ever hacked for.\n\n-- Navneet Narayan";
         let charIndex = 0;
 
         function typeLetter() {
@@ -342,6 +370,19 @@
                 charIndex++;
                 setTimeout(typeLetter, 50); 
             }
+        }
+
+        // --- CAKE CUTTING FUNCTION ---
+        function cutCake() {
+            // Hide full cake
+            document.getElementById('cake-section').style.display = 'none';
+            
+            // Show plates
+            document.getElementById('plate-section').style.display = 'flex';
+            document.getElementById('enjoy-msg').style.display = 'block';
+
+            // Trigger Confetti
+            party();
         }
 
         function party() {
