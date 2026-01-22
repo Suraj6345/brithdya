@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission: KOPIKPO</title>
+    <style>
+        :root {
+            --neon: #00ff41;
+            --danger: #ff0055;
+            --bg: #0d0d0d;
+            --glass: rgba(0, 20, 0, 0.9);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--neon);
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* MATRIX BACKGROUND */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        /* MAIN DEVICE CONTAINER */
+        .device {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 380px;
+            min-height: 600px;
+            background: var(--glass);
+            border: 2px solid var(--neon);
+            box-shadow: 0 0 30px var(--neon);
+            border-radius: 10px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+
+        /* SCREENS */
+        .screen {
+            display: none;
+            width: 100%;
+            animation: flicker 0.2s infinite alternate;
+        }
+        .screen.active { display: block; }
+
+        /* TEXT STYLES */
+        h1 { font-size: 2rem; margin: 10px 0; text-shadow: 0 0 10px var(--neon); }
+        h2 { font-size: 1.2rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--neon); padding-bottom: 10px; }
+        p { font-size: 14px; color: #cfc; line-height: 1.4; }
+        
+        /* LETTER STYLE */
+        .letter-box {
+            text-align: left;
+            border: 1px dashed var(--neon);
+            padding: 15px;
+            margin: 20px 0;
+            background: rgba(0, 50, 0, 0.3);
+            font-size: 0.9rem;
+            min-height: 150px;
+            white-space: pre-wrap; 
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .signature {
+            text-align: right;
+            font-style: italic;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: var(--neon);
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--neon);
+            font-family: 'Courier New', monospace;
+            width: 100%;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        .btn-danger {
+            background: var(--danger);
+            box-shadow: 0 0 15px var(--danger);
+            color: white;
+            animation: pulse 0.5s infinite;
+        }
+
+        /* GAME ELEMENTS */
+        .fingerprint {
+            font-size: 60px;
+            border: 2px dashed var(--neon);
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            cursor: pointer;
+        }
+        .fingerprint:hover { background: rgba(0, 255, 65, 0.2); }
+
+        .pin-display {
+            font-size: 24px;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--neon);
+            display: inline-block;
+            min-width: 100px;
+        }
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        .num {
+            border: 1px solid var(--neon);
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        .bar-container {
+            width: 100%;
+            height: 20px;
+            border: 2px solid var(--neon);
+            margin-top: 10px;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            background: var(--neon);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        /* --- WATERMARK UPDATED SIZE --- */
+        .watermark {
+            position: absolute;
+            bottom: 10px; /* Moved up slightly */
+            font-size: 12px; /* Increased from 9px to 12px (Medium) */
+            opacity: 0.7; /* Made slightly brighter */
+            width: 100%;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes flicker { 0% { opacity: 0.95; } 100% { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="matrix"></canvas>
+
+    <div class="device">
+        
+        <div id="screen-boot" class="screen active">
+            <div style="text-align: left; font-size: 12px; margin-bottom: 20px; color: #0f0; border-left: 2px solid var(--neon); padding-left: 10px;" id="console-text"></div>
+            <p>[ SYSTEM LOADING... ]</p>
+        </div>
+
+        <div id="screen-auth" class="screen">
+            <h2>Identity Check</h2>
+            <p>Subject: <strong>KOPIKPO</strong></p>
+            <div class="fingerprint" onclick="scanFinger()">👆</div>
+            <p>Scan Fingerprint to Unlock</p>
+        </div>
+
+        <div id="screen-pin" class="screen">
+            <h2>Enter Security Code</h2>
+            <p style="font-size:10px; margin-bottom:10px;">(Hint: Current Year)</p>
+            <div class="pin-display" id="pin-val">----</div>
+            <div class="numpad">
+                <div class="num" onclick="typePin(1)">1</div>
+                <div class="num" onclick="typePin(2)">2</div>
+                <div class="num" onclick="typePin(3)">3</div>
+                <div class="num" onclick="typePin(4)">4</div>
+                <div class="num" onclick="typePin(5)">5</div>
+                <div class="num" onclick="typePin(6)">6</div>
+                <div class="num" onclick="typePin(7)">7</div>
+                <div class="num" onclick="typePin(8)">8</div>
+                <div class="num" onclick="typePin(9)">9</div>
+                <div class="num" onclick="typePin('C')">C</div>
+                <div class="num" onclick="typePin(0)">0</div>
+                <div class="num" onclick="checkPin()">⏎</div>
+            </div>
+        </div>
+
+        <div id="screen-hack" class="screen">
+            <h2 style="color: var(--danger)">FIREWALL DETECTED</h2>
+            <p>System Locked!</p>
+            <div class="bar-container">
+                <div class="bar-fill" id="hack-bar"></div>
+            </div>
+            <p id="hack-status">0%</p>
+            <button class="btn btn-danger" onclick="hackProgress()">TAP FAST TO BREAK!</button>
+        </div>
+
+        <div id="screen-final" class="screen">
+            <p style="color: #fff; letter-spacing: 3px;">/// MESSAGE DECRYPTED ///</p>
+            <h1 style="font-size: 1.8rem;">HAPPY BIRTHDAY<br>KOPIKPO!</h1>
+            
+            <div class="letter-box" id="letter-content"></div>
+            
+            <button class="btn" onclick="party()">CELEBRATE 🎉</button>
+        </div>
+
+        <div class="watermark">DESIGNED BY NAVNEET NARAYAN</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        /* --- MUSIC CONTROLLER --- */
+        function playMusic() {
+            var audio = document.getElementById("bg-music");
+            audio.volume = 0.5; 
+            audio.play().catch(error => {
+                console.log("Audio play failed (user interaction needed): " + error);
+            });
+        }
+
+        /* --- MATRIX RAIN --- */
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const chars = "KOPIKPO101010NAVNEET";
+        const drops = Array(Math.floor(canvas.width / 15)).fill(1);
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "#0f0";
+            drops.forEach((y, i) => {
+                const text = chars[Math.floor(Math.random()*chars.length)];
+                ctx.fillText(text, i*15, y*15);
+                if(y*15 > canvas.height && Math.random() > 0.98) drops[i]=0;
+                drops[i]++;
+            });
+        }
+        setInterval(drawMatrix, 50);
+
+        /* --- SCREEN SWITCHER --- */
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        /* --- SCREEN 1: BOOT --- */
+        const logs = ["Connecting...", "Bypassing Security...", "Finding 'Kopikpo'...", "Done."];
+        let logIndex = 0;
+        function typeLog() {
+            if(logIndex < logs.length) {
+                const p = document.createElement('div');
+                p.innerText = "> " + logs[logIndex];
+                document.getElementById('console-text').appendChild(p);
+                logIndex++;
+                setTimeout(typeLog, 500);
+            } else {
+                setTimeout(() => showScreen('screen-auth'), 800);
+            }
+        }
+        window.onload = typeLog;
+
+        /* --- SCREEN 2: AUTH + MUSIC START --- */
+        function scanFinger() {
+            playMusic();
+            const fp = document.querySelector('.fingerprint');
+            fp.style.background = "#0f0"; fp.style.color = "black";
+            setTimeout(() => showScreen('screen-pin'), 500);
+        }
+
+        /* --- SCREEN 3: PIN --- */
+        let pin = "";
+        function typePin(n) {
+            if(n==='C') { pin=""; updatePin(); return; }
+            if(pin.length < 4) { pin += n; updatePin(); }
+        }
+        function updatePin() { document.getElementById('pin-val').innerText = pin.padEnd(4, '-'); }
+        function checkPin() {
+            if(pin === "2026") showScreen('screen-hack');
+            else { alert("WRONG PIN. TRY 2026"); pin=""; updatePin(); }
+        }
+
+        /* --- SCREEN 4: HACK --- */
+        let progress = 0;
+        function hackProgress() {
+            progress += 15; 
+            if(progress > 100) progress = 100;
+            document.getElementById('hack-bar').style.width = progress + "%";
+            document.getElementById('hack-status').innerText = progress + "%";
+            if(progress === 100) {
+                setTimeout(() => {
+                    showScreen('screen-final');
+                    typeLetter(); 
+                    party();
+                }, 500);
+            }
+        }
+
+        /* --- SCREEN 5: LETTER TYPEWRITER --- */
+        const letterText = "Hey Kopikpo,\n\nWishing you a legendary Happy Birthday! You are not just a friend, you are like a brother to me.\n\nMay this year bring you success, happiness, and everything you've ever hacked for.\n\nEnjoy your day!\n\n-- Navneet Narayan";
+        let charIndex = 0;
+
+        function typeLetter() {
+            if (charIndex < letterText.length) {
+                document.getElementById('letter-content').innerHTML += letterText.charAt(charIndex) === '\n' ? '<br>' : letterText.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeLetter, 50); 
+            }
+        }
+
+        function party() {
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 }, colors: ['#0f0', '#fff', '#ff0055'] });
+        }
+    </script>
+</body>
+</html>
