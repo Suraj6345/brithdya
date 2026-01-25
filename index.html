@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Protocol: KOPIKPO-OMEGA</title>
+    <title>Protocol: Muskan-OMEGA</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
@@ -275,7 +275,7 @@
 
         <div id="screen-auth" class="screen">
             <h2>BIOMETRIC REQUIRED</h2>
-            <p>USER: <strong>KOPIKPO</strong></p>
+            <p>USER: <strong>Muskan</strong></p>
             <div class="scanner-box" onclick="startScan()">
                 <div class="scan-line"></div>
             </div>
@@ -315,7 +315,7 @@
 
         <div id="screen-gold" class="screen gold-mode">
             <h2>MISSION ACCOMPLISHED</h2>
-            <h1>HAPPY BIRTHDAY<br>KOPIKPO</h1>
+            <h1>HAPPY BIRTHDAY<br>Muskan</h1>
             
             <div id="cake-stage">
                 <div class="holo-cake" onclick="cutCake()">🎂</div>
@@ -365,7 +365,7 @@
         function bootSystem() {
             document.getElementById('bg-music').play().catch(e=>console.log("Audio waiting"));
             switchScreen('screen-boot');
-            let logs = ["INITIALIZING KERNEL...", "LOADING DRIVERS...", "CHECKING MEMORY: 64TB OK", "CONNECTING SATELLITE...", "TARGET ACQUIRED: KOPIKPO", "REQUESTING ACCESS..."];
+            let logs = ["INITIALIZING KERNEL...", "LOADING DRIVERS...", "CHECKING MEMORY: 64TB OK", "CONNECTING SATELLITE...", "TARGET ACQUIRED: Muskan", "REQUESTING ACCESS..."];
             let i = 0;
             let int = setInterval(() => {
                 if(i >= logs.length) { clearInterval(int); setTimeout(()=>switchScreen('screen-auth'), 1000); }
@@ -425,7 +425,7 @@
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         }
 
-        const letter = "PROTOCOL COMPLETED.\n\nHappy Birthday Kopikpo!\n\nWishing you a year full of upgrades, success, and joy. You are the best friend a guy could ask for.\n\nEnjoy the cake!\n\n-- Navneet Narayan";
+        const letter = "PROTOCOL COMPLETED.\n\nHappy Birthday Muskan!\n\nWishing you a year full of upgrades, success, and joy. You are the best friend a guy could ask for.\n\nEnjoy the cake!\n\n-- Navneet Narayan";
         let lIdx = 0;
         function typeLetter() {
             if(lIdx < letter.length) {
