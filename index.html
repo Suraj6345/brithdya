@@ -391,7 +391,7 @@
             document.getElementById('pin-display').innerText = pin.padEnd(4, '-');
         }
         function pinCheck() {
-            if(pin === "2026") switchScreen('screen-hack');
+            if(pin === "2008") switchScreen('screen-hack');
             else { 
                 document.getElementById('pin-display').style.color = "red";
                 setTimeout(()=>{ pin=""; pinInput('C'); document.getElementById('pin-display').style.color="white"; }, 500);
